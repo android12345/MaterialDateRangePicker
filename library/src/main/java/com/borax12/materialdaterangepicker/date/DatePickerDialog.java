@@ -160,6 +160,8 @@ public class DatePickerDialog extends DialogFragment implements
     private com.borax12.materialdaterangepicker.date.YearPickerView mYearPickerViewEnd;
     private com.borax12.materialdaterangepicker.date.AccessibleDateAnimator mAnimatorEnd;
     private int tabTag=1;
+    private String startTitle;
+    private String endTitle;
 
     /**
      * The callback used to indicate the user is done filling in the date.
@@ -284,18 +286,21 @@ public class DatePickerDialog extends DialogFragment implements
             Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView: ");
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-        View view = inflater.inflate(R.layout.mdtp_date_picker_dialog, null);
+        View view = inflater.inflate(R.layout.range_date_picker_dialog, null);
 
         tabHost = (TabHost) view.findViewById(R.id.tabHost);
         tabHost.findViewById(R.id.tabHost);
         tabHost.setup();
+
+        final Activity activity = getActivity();
+
         TabHost.TabSpec startDatePage = tabHost.newTabSpec("start");
         startDatePage.setContent(R.id.start_date_group);
-        startDatePage.setIndicator("FROM");
+        startDatePage.setIndicator((startTitle != null && !startTitle.isEmpty()) ? startTitle : activity.getResources().getString(R.string.mdtp_from));
 
         TabHost.TabSpec endDatePage = tabHost.newTabSpec("end");
         endDatePage.setContent(R.id.end_date_group);
-        endDatePage.setIndicator("TO");
+        endDatePage.setIndicator((endTitle!=null&&!endTitle.isEmpty())?endTitle:activity.getResources().getString(R.string.mdtp_to));
 
         tabHost.addTab(startDatePage);
         tabHost.addTab(endDatePage);
@@ -348,7 +353,6 @@ public class DatePickerDialog extends DialogFragment implements
             mDismissOnPause = savedInstanceState.getBoolean(KEY_DISMISS);
         }
 
-        final Activity activity = getActivity();
         mDayPickerView = new com.borax12.materialdaterangepicker.date.SimpleDayPickerView(activity, this);
         mYearPickerView = new com.borax12.materialdaterangepicker.date.YearPickerView(activity, this);
         mDayPickerViewEnd = new com.borax12.materialdaterangepicker.date.SimpleDayPickerView(activity, this);
@@ -848,7 +852,7 @@ public class DatePickerDialog extends DialogFragment implements
             mCalendarEnd.set(Calendar.DAY_OF_MONTH, day);
         }
 
-        updatePickers();
+        //updatePickers();
         updateDisplay(true);
     }
 
@@ -859,7 +863,12 @@ public class DatePickerDialog extends DialogFragment implements
 
     @Override
     public com.borax12.materialdaterangepicker.date.MonthAdapter.CalendarDay getSelectedDay() {
-        return new com.borax12.materialdaterangepicker.date.MonthAdapter.CalendarDay(mCalendar);
+        if(tabHost.getCurrentTab()==0){
+            return new com.borax12.materialdaterangepicker.date.MonthAdapter.CalendarDay(mCalendar);
+        }else{
+            return new com.borax12.materialdaterangepicker.date.MonthAdapter.CalendarDay(mCalendarEnd);
+        }
+
     }
 
     @Override
@@ -894,5 +903,21 @@ public class DatePickerDialog extends DialogFragment implements
     @Override
     public void tryVibrate() {
         if(mVibrate) mHapticFeedbackController.tryVibrate();
+    }
+    
+    /**
+     * setStartTitle
+     * @param String the title to display for start panel
+     */ 
+    public void setStartTitle(String startTitle) {
+        this.startTitle = startTitle;
+    }
+    
+    /**
+     * setEndTitle
+     * @param String the title to display for end panel
+     */ 
+    public void setEndTitle(String endTitle) {
+        this.endTitle = endTitle;
     }
 }
